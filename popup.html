@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Walmart Splitter</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div class="container">
+    <h2>Walmart Splitter</h2>
+
+    <div class="section">
+      <label>People to split with</label>
+      <div id="namesContainer"></div>
+      <div class="row">
+        <input id="newName" placeholder="Add a name" />
+        <button id="addNameBtn">Add</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <label>Google Sheet URL</label>
+      <input id="sheetUrl" placeholder="https://docs.google.com/spreadsheets/d/..." />
+      <div class="row">
+        <button id="testSheetBtn">Test Connection</button>
+        <span id="sheetStatus"></span>
+      </div>
+    </div>
+
+    <div class="section">
+      <button id="extractBtn">Extract Order</button>
+      <div id="loadingArea"></div>
+    </div>
+
+    <div id="itemsArea" class="itemsArea"></div>
+
+    <div class="section">
+      <button id="exportBtn" class="primary">Export to Sheet</button>
+      <div id="exportStatus"></div>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "Walmart Split Extractor",
+  "version": "1.0",
+  "description": "Extract Walmart order details using AgentQL.",
+  "permissions": ["activeTab", "scripting"],
+  "host_permissions": ["http://localhost:3000/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.walmart.com/*", 
+                "https://*.walmart.com/*",
+                "https://api.agentql.com/*"],
+      "js": ["content.js"]
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Walmart Splitter"
+  }
+}
