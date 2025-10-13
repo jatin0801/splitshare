@@ -147,9 +147,7 @@ app.post("/test-sheet", async (req, res) => {
 app.post("/write-sheet", async (req, res) => {
   try {
     const { sheetUrlOrId, sheetName = "Sheet1", rows } = req.body;
-    console.log("sheetUrlOrId", sheetUrlOrId)
-    console.log("sheetName", sheetName)
-    console.log("rows", rows)
+
     if (!sheetUrlOrId || !rows || !Array.isArray(rows)) return res.status(400).json({ error: "Provide sheetUrlOrId and rows array" });
 
     const match = sheetUrlOrId.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
@@ -177,7 +175,7 @@ app.post("/write-sheet", async (req, res) => {
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
-  console.log(`AgentQL backend listening on port ${port}`);
+  console.log(`Backend listening on port ${port}`);
 });
 
 // {

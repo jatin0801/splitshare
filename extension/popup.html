@@ -1,13 +1,15 @@
 <!doctype html>
 <html>
+
 <head>
   <meta charset="utf-8" />
-  <title>Walmart Splitter</title>
+  <title>SplitShare</title>
   <link rel="stylesheet" href="popup.css" />
 </head>
+
 <body>
   <div class="container">
-    <h2>Walmart Splitter</h2>
+    <h2>SplitShare</h2>
 
     <div class="section">
       <label>People to split with</label>
@@ -20,11 +22,12 @@
 
     <div class="section">
       <label>Google Sheet URL</label>
-      <input id="sheetUrl" placeholder="https://docs.google.com/spreadsheets/d/..." />
       <div class="row">
+        
+        <input id="sheetUrl" placeholder="https://docs.google.com/spreadsheets/d/..." />
         <button id="testSheetBtn">Test Connection</button>
-        <span id="sheetStatus"></span>
       </div>
+      <span id="sheetStatus"></span>
     </div>
 
     <div class="section">
@@ -42,4 +45,5 @@
 
   <script src="popup.js"></script>
 </body>
+
 </html>

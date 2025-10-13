@@ -24,7 +24,7 @@ function renderPeople() {
     chip.innerHTML = `<span>${p}</span>`;
     const btn = document.createElement("button");
     btn.textContent = "✕";
-    btn.onclick = () => { people.splice(idx,1); renderPeople(); renderItems(); };
+    btn.onclick = () => { people.splice(idx, 1); renderPeople(); renderItems(); };
     chip.appendChild(btn);
     namesContainer.appendChild(chip);
   });
@@ -38,6 +38,13 @@ addNameBtn.onclick = () => {
   renderPeople();
   renderItems();
 };
+
+newNameInput.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault(); 
+    addNameBtn.click();
+  }
+});
 
 testSheetBtn.onclick = async () => {
   const sheetUrl = sheetUrlInput.value.trim();
@@ -57,7 +64,7 @@ extractBtn.onclick = async () => {
   loadingArea.innerHTML = "<div class='loading'>Extracting order — please wait...</div>";
   itemsArea.innerHTML = "";
   const resp = await new Promise(resolve => chrome.runtime.sendMessage({ type: "run-extract" }, r => resolve(r)));
-  rawOrderDetails = resp
+  rawOrderDetails = resp.raw
   loadingArea.innerHTML = "";
   if (resp?.error) {
     itemsArea.innerHTML = `<div class="loading">Extraction failed: ${resp.error}</div>`;
@@ -72,8 +79,7 @@ extractBtn.onclick = async () => {
     raw: i
   }));
   if (!items.length) {
-    itemsArea.innerHTML = `<div class="loading">No items found. Inspect the AgentQL response in console (background) for details.</div>`;
-    console.log("Raw AgentQL response:", resp.raw);
+    itemsArea.innerHTML = `<div class="loading">No items found.</div>`;
     return;
   }
   renderItems();
@@ -98,12 +104,12 @@ function renderItems() {
     img.onerror = () => { img.src = ""; img.style.background = "#f5f5f5"; };
     const info = document.createElement("div");
     info.className = "itemInfo";
-    info.innerHTML = `<div class="itemName">${it.product_name}</div><div class="itemPrice">$${(it.product_price||0).toFixed(2)} × ${it.quantity}</div>`;
+    info.innerHTML = `<div class="itemName">${it.product_name}</div><div class="itemPrice">$${(it.product_price || 0).toFixed(2)} × ${it.quantity}</div>`;
     const multi = document.createElement("select");
     multi.className = "multiSelect";
     multi.multiple = true;
     // option for no selection: we treat as "none selected"
-    people.forEach((p,i) => {
+    people.forEach((p, i) => {
       const opt = document.createElement("option");
       opt.value = p;
       opt.text = p;
@@ -126,9 +132,9 @@ function renderItems() {
 
 // compute splits and prepare rows for sheet
 function computeSplitsRows() {
-  const orderDate = rawOrderDetails?.order_info?.order_date || "N/A";
-  const rows = [[`**Order Date:**`, `**${orderDate}**`]]; 
-  const header = ["**Item**", "**Total Price**", ...people.map(p => `**${p}**`)];
+  const orderDate = rawOrderDetails?.data?.order_info?.order_date || "N/A";
+  const rows = [[`Order Date:`, `${orderDate}`]];
+  const header = ["Item", "Total Price", ...people.map(p => `${p}`)];
   rows.push(header);
 
   let grandTotal = 0;
@@ -157,23 +163,23 @@ function computeSplitsRows() {
     people.forEach(p => personTotals[p] += alloc[p]);
 
     const row = [it.product_name, total.toFixed(2)];
-    people.forEach(p => row.push( alloc[p] ? Number(alloc[p].toFixed(2)) : 0 ));
+    people.forEach(p => row.push(alloc[p] ? Number(alloc[p].toFixed(2)) : 0));
     rows.push(row);
   });
 
-  const taxAmount = rawOrderDetails?.order_info?.tax_amount || 0;
+  const taxAmount = rawOrderDetails?.data?.order_info?.tax_amount || 0;
   if (taxAmount > 0 && people.length > 0) {
     const perPersonTax = taxAmount / people.length;
-    const taxRow = ["**Tax**", `**${taxAmount.toFixed(2)}**`];
+    const taxRow = ["Tax", `${taxAmount.toFixed(2)}`];
     people.forEach(p => {
       personTotals[p] += perPersonTax;
-      taxRow.push(`**${perPersonTax.toFixed(2)}**`);
+      taxRow.push(`${perPersonTax.toFixed(2)}`);
     });
     rows.push(taxRow);
   }
 
-  const totalRow = ["**Total**", `**${(grandTotal + taxAmount).toFixed(2)}**`];
-  people.forEach(p => totalRow.push(`**${personTotals[p].toFixed(2)}**`));
+  const totalRow = ["Total", `${(grandTotal + taxAmount).toFixed(2)}`];
+  people.forEach(p => totalRow.push(`${personTotals[p].toFixed(2)}`));
   rows.push(totalRow);
   return rows;
 }
