@@ -15,6 +15,23 @@ let items = [];  // array of {product_name, product_price, product_image_url, qu
 let rawOrderDetails = {};
 let sheetOk = false;
 
+chrome.storage.local.get(['people', 'sheetUrl', 'items', 'rawOrderDetails']).then(result => {
+  if (result.people) {
+    people = result.people;
+    renderPeople();
+  }
+  if (result.sheetUrl) {
+    sheetUrlInput.value = result.sheetUrl;
+  }
+  if (result.items) {
+    items = result.items;
+    renderItems();
+  }
+  if (result.rawOrderDetails) {
+    rawOrderDetails = result.rawOrderDetails;
+  }
+});
+
 
 function renderPeople() {
   namesContainer.innerHTML = "";
@@ -24,7 +41,7 @@ function renderPeople() {
     chip.innerHTML = `<span>${p}</span>`;
     const btn = document.createElement("button");
     btn.textContent = "✕";
-    btn.onclick = () => { people.splice(idx, 1); renderPeople(); renderItems(); };
+    btn.onclick = () => { people.splice(idx, 1); renderPeople(); renderItems(); saveState(); };
     chip.appendChild(btn);
     namesContainer.appendChild(chip);
   });
@@ -37,6 +54,7 @@ addNameBtn.onclick = () => {
   newNameInput.value = "";
   renderPeople();
   renderItems();
+  saveState();
 };
 
 newNameInput.addEventListener("keypress", (e) => {
@@ -50,6 +68,7 @@ testSheetBtn.onclick = async () => {
   const sheetUrl = sheetUrlInput.value.trim();
   if (!sheetUrl) { sheetStatus.textContent = "Enter sheet URL"; return; }
   sheetStatus.textContent = "Testing...";
+  saveState();
   const resp = await new Promise(resolve => chrome.runtime.sendMessage({ type: "test-sheet", sheetUrl }, r => resolve(r)));
   if (resp?.ok) {
     sheetStatus.textContent = `Connected: ${resp.spreadsheet.title}`;
@@ -83,6 +102,7 @@ extractBtn.onclick = async () => {
     return;
   }
   renderItems();
+  saveState();
 };
 
 function parsePrice(v) {
@@ -120,6 +140,7 @@ function renderItems() {
       // store selections
       const selected = Array.from(multi.selectedOptions).map(o => o.value);
       items[idx].selectedUsers = selected;
+      saveState();
     };
     // default none selected -> will be split equally among all people
     items[idx].selectedUsers = [];
@@ -201,3 +222,32 @@ exportBtn.onclick = async () => {
     exportStatus.textContent = `Error: ${resp?.error || JSON.stringify(resp)}`;
   }
 };
+
+document.addEventListener("DOMContentLoaded", () => {
+  const coll = document.querySelector(".collapsible");
+  const content = document.querySelector(".collapsible-content");
+
+  if (coll && content) {
+    coll.addEventListener("click", () => {
+      coll.classList.toggle("active");
+      if (content.style.maxHeight) {
+        content.style.maxHeight = null;
+        content.classList.remove("open");
+        coll.textContent = "Show Instructions";
+      } else {
+        content.style.maxHeight = content.scrollHeight + "px";
+        content.classList.add("open");
+        coll.textContent = "Hide Instructions";
+      }
+    });
+  }
+});
+
+function saveState() {
+  chrome.storage.local.set({
+    people,
+    sheetUrl: sheetUrlInput.value.trim(),
+    items,
+    rawOrderDetails
+  }).catch(err => console.error("Save state error:", err));
+}

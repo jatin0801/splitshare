@@ -5,7 +5,8 @@
   "description": "Extract order details from any e-commerce site and split among friends and roommates.",
   "permissions": [
     "activeTab",
-    "scripting"
+    "scripting",
+    "storage"
   ],
   "host_permissions": [
     "https://splitshare-q58l.onrender.com/*"
