@@ -3,38 +3,45 @@ const BACKEND = "https://splitshare-q58l.onrender.com";
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.type === "run-extract") {
-    // ask content script for html
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    // Get the active tab
+    chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
       const tab = tabs[0];
       if (!tab) return sendResponse({ error: "No active tab" });
 
-      chrome.tabs.sendMessage(tab.id, { type: "getPageHTML" }, async (resp) => {
-        if (!resp) return sendResponse({ error: "Content script no response; ensure on Walmart page and extension allowed" });
+      try {
+        // inject content script programmatically
+        await chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          files: ["content.js"]
+        });
 
-        try {
-          const fetchResp = await fetch(`${BACKEND}/extract-order`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ html: resp.html, url: resp.url })
+        // ask the injected content script for HTML
+        chrome.tabs.sendMessage(tab.id, { type: "getPageHTML" }, async (resp) => {
+          if (!resp) return sendResponse({
+            error: "Content script no response; ensure extension has access to this page"
           });
-          const j = await fetchResp.json();
-          const data =
-          j?.data && typeof j.data === "object" && Object.keys(j.data).length
-            ? j.data
-            : j;
-          // Normalize items: try to get j.data.items[] or similar depending on agentql response structure.
-          // const items = (j?.data?.result?.items) || (j?.data?.items) || (j?.items) || extractItemsFallback(j);
-          const items =
-          data.result?.items ||
-          data.items ||
-          j.items ||
-          extractItemsFallback(j);
-          sendResponse({ ok: true, raw: j, items });
-        } catch (e) {
-          sendResponse({ error: e.message || e });
-        }
-      });
+
+          try {
+            const fetchResp = await fetch(`${BACKEND}/extract-order`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ html: resp.html, url: resp.url })
+            });
+
+            const j = await fetchResp.json();
+            const data = j?.data && typeof j.data === "object" && Object.keys(j.data).length ? j.data : j;
+
+            const items = data.result?.items || data.items || j.items || extractItemsFallback(j);
+            sendResponse({ ok: true, raw: j, items });
+          } catch (e) {
+            sendResponse({ error: e.message || e });
+          }
+        });
+      } catch (error) {
+        sendResponse({ error: `Failed to inject content script: ${error.message}` });
+      }
     });
+
     return true; // will sendResponse asynchronously
   }
 
@@ -57,7 +64,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ sheetUrlOrId: msg.sheetUrl, sheetName: msg.sheetName, rows: msg.rows })
     })
-    .then(r => r.json()).then(j => sendResponse(j)).catch(e => sendResponse({ error: e.message }));
+      .then(r => r.json()).then(j => sendResponse(j)).catch(e => sendResponse({ error: e.message }));
     return true;
   }
 });

@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Evenly: Bill Split Extractor",
+  "name": "Evenly: Universal Bill Split Extractor",
   "version": "1.0",
-  "description": "Extract Walmart or Amazon order details and split among friends and roomates.",
+  "description": "Extract order details from any e-commerce site and split among friends and roommates.",
   "permissions": [
     "activeTab",
     "scripting"
@@ -19,21 +19,8 @@
     "48": "icons/evenly-48x48.png",
     "128": "icons/evenly-128x128.png"
   },
-  "content_scripts": [
-    {
-      "matches": [
-        "https://www.walmart.com/*",
-        "https://*.walmart.com/*",
-        "https://api.agentql.com/*",
-        "https://www.amazon.com/*"
-      ],
-      "js": [
-        "content.js"
-      ]
-    }
-  ],
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Walmart Splitter"
+    "default_title": "Evenly: Universal Bill Split Extractor"
   }
 }

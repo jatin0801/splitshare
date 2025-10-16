@@ -2,6 +2,7 @@ const express = require("express");
 const axios = require("axios");
 const bodyParser = require("body-parser");
 const { google } = require("googleapis");
+const { JWT } = require('google-auth-library');
 const cors = require("cors");
 require("dotenv").config();
 
@@ -82,30 +83,6 @@ app.post("/extract-order", async (req, res) => {
   }
 });
 
-// async function getSheetsClient() {
-//   // Option A: from JSON string environment variable
-//   console.log("getSheetsClient")
-//   const keyJson = process.env.GOOGLE_SERVICE_ACCOUNT_KEY_JSON;
-//   if (!keyJson) throw new Error("Missing GOOGLE_SERVICE_ACCOUNT_KEY_JSON env var (service account key JSON)");
-
-//   const service_key = JSON.parse(keyJson);
-//   const privateKey = service_key.private_key.replace(/\\n/g, "\n");
-//     console.log("service_key", service_key)
-//     console.log("Raw env length:", keyJson?.length);
-// console.log("Parsed private key starts with:", service_key.private_key?.slice(0, 40));
-// console.log(process.env.GOOGLE_SERVICE_ACCOUNT_KEY_JSON.includes("\\n")); // should print true
-
-
-//   const jwtClient = new google.auth.JWT(
-//     service_key.client_email,
-//     null,
-//     privateKey,
-//     ["https://www.googleapis.com/auth/spreadsheets"]
-//   );
-//     await jwtClient.authorize();
-
-//   return google.sheets({ version: "v4", auth: jwtClient });
-// }
 
 async function getSheetsClient() {
   const keyJson = process.env.GOOGLE_SERVICE_ACCOUNT_KEY_JSON;

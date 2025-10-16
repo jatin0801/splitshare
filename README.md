@@ -1,5 +1,5 @@
 
-# 🧾 Evenly Chrome Extension
+# 🧾 Evenly: Universal Bill Split Extractor - Chrome Extension
 
 A lightweight Chrome extension that automatically extracts order details from shopping sites (like Walmart or Amazon) using **AgentQL**, and then calculates item-wise and person-wise cost splits — just like Splitwise. Finally, it exports the result directly to **Google Sheets**.
 
